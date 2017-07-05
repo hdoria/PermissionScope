@@ -21,8 +21,6 @@ class ViewController: UIViewController {
         singlePscope.addPermission(NotificationsPermission(notificationCategories: nil),
             message: "We use this to send you\r\nspam and love notes")
 
-        multiPscope.addPermission(ContactsPermission(),
-            message: "We use this to steal\r\nyour friends")
         multiPscope.addPermission(NotificationsPermission(notificationCategories: nil),
             message: "We use this to send you\r\nspam and love notes")
         multiPscope.addPermission(LocationWhileInUsePermission(),
@@ -33,48 +31,14 @@ class ViewController: UIViewController {
 //        multiPscope.addPermission(BluetoothPermission(), message: "We use this to drain your battery")
 
         noUIPscope.addPermission(NotificationsPermission(notificationCategories: nil), message: "notifications")
-        noUIPscope.addPermission(MicrophonePermission(), message: "microphone")
         noUIPscope.onAuthChange = {
             (finished, results) in
             print("auth change",finished,results)
         }
     }
-    
-    // an example of how to use the unified permissions API
-    func checkContacts() {
-        switch PermissionScope().statusContacts() {
-        case .unknown:
-            // ask
-            PermissionScope().requestContacts()
-        case .unauthorized, .disabled:
-            // bummer
-            return
-        case .authorized:
-            // thanks!
-            return
-        }
-    }
+
     
     @IBAction func singlePerm() {
-        singlePscope.show(
-            { finished, results in
-                print("got results \(results)")
-            },
-            cancelled: { results in
-                print("thing was cancelled")
-            }
-        )
-    }
-    
-    @IBAction func multiPerms() {
-        multiPscope.show(
-            { finished, results in
-                print("got results \(results)")
-            },
-            cancelled: { results in
-                print("thing was cancelled")
-            }
-        )
     }
 
     @IBAction func noUIPerm() {
