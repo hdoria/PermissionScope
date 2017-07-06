@@ -651,18 +651,47 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             break
         }
     }
-    
+
+    // MARK: - UI
 
     /**
-    Creates the modal viewcontroller and shows it.
-    */
+     Shows the modal viewcontroller for requesting access to the configured permissions and sets up the closures on it.
+
+     - parameter authChange: Called when a status is detected on any of the permissions.
+     - parameter cancelled:  Called when the user taps the Close button.
+     */
+    @objc public func show(_ authChange: authClosureType? = nil, cancelled: cancelClosureType? = nil) {
+        assert(!configuredPermissions.isEmpty, "Please add at least one permission")
+
+        onAuthChange = authChange
+        onCancel = cancelled
+
+        DispatchQueue.main.async {
+            // call other methods that need to wait before show
+            // no missing required perms? callback and do nothing
+            self.requiredAuthorized({ areAuthorized in
+                if areAuthorized {
+                    self.getResultsForConfig({ results in
+
+                        self.onAuthChange?(true, results)
+                    })
+                } else {
+                    self.showAlert()
+                }
+            })
+        }
+    }
+
+    /**
+     Creates the modal viewcontroller and shows it.
+     */
     fileprivate func showAlert() {
         // add the backing views
         let window = UIApplication.shared.keyWindow!
-        
+
         //hide KB if it is shown
         window.endEditing(true)
-        
+
         window.addSubview(view)
         view.frame = window.bounds
         baseView.frame = window.bounds
@@ -687,13 +716,13 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             permissionLabels.append(label)
             contentView.addSubview(label)
         }
-        
+
         self.view.setNeedsLayout()
-        
+
         // slide in the view
         self.baseView.frame.origin.y = self.view.bounds.origin.y - self.baseView.frame.size.height
         self.view.alpha = 0
-        
+
         UIView.animate(withDuration: 0.2, delay: 0.0, options: [], animations: {
             self.baseView.center.y = window.center.y + 15
             self.view.alpha = 1
@@ -705,8 +734,8 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     }
 
     /**
-    Hides the modal viewcontroller with an animation.
-    */
+     Hides the modal viewcontroller with an animation.
+     */
     public func hide() {
         let window = UIApplication.shared.keyWindow!
 
@@ -718,7 +747,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
                 self.view.removeFromSuperview()
             })
         })
-        
+
         notificationTimer?.invalidate()
         notificationTimer = nil
     }
